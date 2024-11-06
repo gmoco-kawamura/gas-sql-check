@@ -1,5 +1,5 @@
 function getSql(folderId) {
-  const fileName = 'SQL57.sql';  // 取得したいファイル名
+  const fileName = 'SQL80.sql';  // 取得したいファイル名
 
   // フォルダ内の指定されたファイルを取得
   const folder = DriveApp.getFolderById(folderId);

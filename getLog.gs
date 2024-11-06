@@ -1,7 +1,7 @@
 function getLog(folderId) {
-  const fileName1 = 'SQL57-1.log';  // 取得したいファイル名
-  const fileName2 = 'SQL57-2.log';
-  const fileName3 = 'SQL57-3.log';
+  const fileName1 = 'SQL80-1.log';  // 取得したいファイル名
+  const fileName2 = 'SQL80-2.log';
+  const fileName3 = 'SQL80-3.log';
 
   // フォルダ内の指定されたファイルを取得
   const folder = DriveApp.getFolderById(folderId);

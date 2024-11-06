@@ -1,4 +1,4 @@
-function getFolderIdFromSpreadsheet(sheet, parentFolderId, row) {
+function getFolderIdFromSheet(sheet, parentFolderId, row) {
   try {
     const cellB = getNonEmptyCell(sheet, 'B', row);  // 空白であれば上のセルを参照
     const cellC = getNonEmptyCell(sheet, 'C', row);  // 空白であれば上のセルを参照
@@ -26,7 +26,7 @@ function getFolderIdFromSpreadsheet(sheet, parentFolderId, row) {
     
     return folderSuccessId;
   } catch (error) {
-    Logger.log('Error: ' + error.message);
+    Logger.log(error.message);
     return null;
   }
 }
