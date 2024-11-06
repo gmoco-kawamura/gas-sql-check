@@ -31,7 +31,6 @@ function getFolderIdFromSheet(sheet, parentFolderId, row) {
   }
 }
 
-
 function getNonEmptyCell(sheet, column, row) {
   let currentRow = row;
   let cellValue = sheet.getRange(column + currentRow).getValue();

@@ -55,8 +55,8 @@ function executeSqlQueries() {
 }
 
 function executeSqlQuery(row = null, isStandalone = true) {
+  // rowの初期設定
   if(isStandalone) {
-    // 対象の行
     row = settingSheet.getRange('C2').getValue();
     if (row === '') {
       Logger.log('"C2" is empty');
@@ -68,14 +68,13 @@ function executeSqlQuery(row = null, isStandalone = true) {
   // SQLクエリを取得
   const sqlQuery = sheet.getRange('I' + row).getValue();
   if (sqlQuery === '') {
-    Logger.log('SQL I' + row + ' is empty')
+    Logger.log(`SQL query at I${row} is empty`);
     return;
   }
   Logger.log('sql: ' + sqlQuery);
 
   // hostの選定
-  const isSelectQuery = sqlQuery.trim().toLowerCase().startsWith('select');
-  const host = isSelectQuery ? 'reader' : 'writer';
+  const host = sqlQuery.trim().toLowerCase().startsWith('select') ? 'reader' : 'writer';
   Logger.log('Host: ' + host); 
 
   // リクエストオプションの設定
