@@ -1,42 +1,3 @@
-// function inputSheetFromEvidence() {
-//   const scriptProperties = PropertiesService.getScriptProperties();
-//   const spreadsheetId = scriptProperties.getProperty('spreadsheetId');
-//   const sheetName = scriptProperties.getProperty('sheetName');
-//   const settingSheetName = scriptProperties.getProperty('settingSheetName');
-//   const sheet = SpreadsheetApp.openById(spreadsheetId).getSheetByName(sheetName);
-//   const settingSheet = SpreadsheetApp.openById(spreadsheetId).getSheetByName(settingSheetName);
-
-//   try {
-//     const row = settingSheet.getRange('C2').getValue();
-//     const resultCell = 'C3';
-//     const parentFolderId = PropertiesService.getScriptProperties().getProperty('parentFolderId'); // 親フォルダのID
-    
-//     const folderId = getFolderIdFromSheet(sheet, parentFolderId, row);
-//     if (!folderId) throw new Error('フォルダIDが取得できませんでした');
-    
-//     const sql = getSql(folderId);
-//     if (!sql) throw new Error('SQLファイルが見つかりませんでした');
-    
-//     const result = getLog(folderId);
-//     if (!result || !result.row || !result.averageExecutionTime) throw new Error('ログ情報の取得に失敗しました');
-    
-//     // データをスプレッドシートに書き込み
-//     sheet.getRange('I' + row).setValue(sql);
-//     sheet.getRange('J' + row).setValue(result.row); 
-//     sheet.getRange('K' + row).setValue(result.averageExecutionTime); 
-
-//     // 結果の入力
-//     const now = new Date();
-//     const message = 'Success: Row ' + row + ' updated at ' + now.toLocaleString();
-//     settingSheet.getRange(resultCell).setValue(message);
-//   } catch (error) {
-//     // エラー発生時にL列にエラーメッセージを入力
-//     settingSheet.getRange('C3').setValue('Error: ' + error.message);
-//     Logger.log('Error: ' + error.message);
-//   }
-// }
-
-
 const scriptProperties = PropertiesService.getScriptProperties();
 const spreadsheetId = scriptProperties.getProperty('spreadsheetId');
 const sheetName = 'test' //scriptProperties.getProperty('sheetName');
@@ -46,14 +7,15 @@ const settingSheet = SpreadsheetApp.openById(spreadsheetId).getSheetByName(setti
 const parentFolderId = PropertiesService.getScriptProperties().getProperty('parentFolderId'); // 親フォルダのID
 const url = 'http://34.84.94.96:8080/execute-sql'; // ComputeEngineのAPIサーバーのURL
 
+// // すべてのSQLを実行する関数
+// function executeSqlQueries() {
+//   const lastRow = sheet.getRange("A2:A").getValues().filter(String).length + 1;
+//   for (let row = 2; row <= lastRow; row++) {
+//     executeSqlQuery(row, false);
+//   }
+// }
 
-function executeSqlQueries() {
-  const lastRow = sheet.getRange("A2:A").getValues().filter(String).length + 1;
-  for (let row = 2; row <= lastRow; row++) {
-    executeSqlQuery(row, false);
-  }
-}
-
+// 単一行のSQLを実行する関数
 function executeSqlQuery(row = null, isStandalone = true) {
   // rowの初期設定
   if(isStandalone) {
@@ -104,7 +66,7 @@ function executeSqlQuery(row = null, isStandalone = true) {
 
       // 取得結果をログ出力
       Logger.log('result: '+ JSON.stringify(result.data));
-      Logger.log('row: ' + result.rowCount);
+      Logger.log('rowCount: ' + result.rowCount);
       Logger.log('executionTime: '+ result.executionTime);
       Logger.log('startTime: ' + result.startTime);
 
@@ -117,6 +79,9 @@ function executeSqlQuery(row = null, isStandalone = true) {
         // sql保存
         const sqlFileId = saveSql(sqlQuery, folderId);
         Logger.log('Saved Sql File Id: ' + sqlFileId);
+
+        // データをスプレッドシートに書き込み
+        // sheet.getRange('J' + row).setValue(result.rowCount);  // 対象レコード数
       }
 
       // log保存
@@ -127,7 +92,7 @@ function executeSqlQuery(row = null, isStandalone = true) {
     // 平均処理時間
     const averageExecutionTimeSec = ((totalExecutionTime / 3) / 1000).toFixed(3);
     // データをスプレッドシートに書き込み
-    sheet.getRange('L' + row).setValue(averageExecutionTimeSec);
+    sheet.getRange('L' + row).setValue(averageExecutionTimeSec);  // 実行時間3回平均
 
   } catch (error) {
     // エラー発生時にL列にエラーメッセージを入力
@@ -136,3 +101,42 @@ function executeSqlQuery(row = null, isStandalone = true) {
   }
   return;
 }
+
+// // エビデンスを元にスプレッドシートにデータを入力する関数
+// function inputSheetFromEvidence() {
+//   const scriptProperties = PropertiesService.getScriptProperties();
+//   const spreadsheetId = scriptProperties.getProperty('spreadsheetId');
+//   const sheetName = scriptProperties.getProperty('sheetName');
+//   const settingSheetName = scriptProperties.getProperty('settingSheetName');
+//   const sheet = SpreadsheetApp.openById(spreadsheetId).getSheetByName(sheetName);
+//   const settingSheet = SpreadsheetApp.openById(spreadsheetId).getSheetByName(settingSheetName);
+
+//   try {
+//     const row = settingSheet.getRange('C2').getValue();
+//     const resultCell = 'C3';
+//     const parentFolderId = PropertiesService.getScriptProperties().getProperty('parentFolderId'); // 親フォルダのID
+    
+//     const folderId = getFolderIdFromSheet(sheet, parentFolderId, row);
+//     if (!folderId) throw new Error('フォルダIDが取得できませんでした');
+    
+//     const sql = getSql(folderId);
+//     if (!sql) throw new Error('SQLファイルが見つかりませんでした');
+    
+//     const result = getLog(folderId);
+//     if (!result || !result.row || !result.averageExecutionTime) throw new Error('ログ情報の取得に失敗しました');
+    
+//     // データをスプレッドシートに書き込み
+//     sheet.getRange('I' + row).setValue(sql);
+//     sheet.getRange('J' + row).setValue(result.row); 
+//     sheet.getRange('K' + row).setValue(result.averageExecutionTime); 
+
+//     // 結果の入力
+//     const now = new Date();
+//     const message = 'Success: Row ' + row + ' updated at ' + now.toLocaleString();
+//     settingSheet.getRange(resultCell).setValue(message);
+//   } catch (error) {
+//     // エラー発生時にL列にエラーメッセージを入力
+//     settingSheet.getRange('C3').setValue('Error: ' + error.message);
+//     Logger.log('Error: ' + error.message);
+//   }
+// }

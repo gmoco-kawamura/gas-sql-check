@@ -14,7 +14,7 @@ function saveCsv(csvContent, folderId) {
 
 function saveSql(sqlContent, folderId) {
   // SQL コンテンツを Blob に変換し、ファイル名を指定
-  const blob = Utilities.newBlob(sqlContent, 'application/sql', 'SQL80.sql');
+  const blob = Utilities.newBlob(sqlContent, 'text/plain', 'SQL80.sql');
   
   // フォルダ ID で対象フォルダを取得
   const folder = DriveApp.getFolderById(folderId);
