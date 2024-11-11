@@ -15,18 +15,35 @@ function createLogContent(startTime, sqlQuery, rowCount, executionTime) {
   return logContent;
 }
 
+
 function convertJsonToCsv(result) {
   // CSVのヘッダーを取得
   const headers = Object.keys(result[0]);
   let csvContent = headers.join(",") + "\n";
 
+  // ISO 8601 日付の正規表現パターン
+  const isoDatePattern = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
+
   // データ行を追加
   result.forEach(row => {
     const values = headers.map(header => {
       const cell = row[header];
-      return cell === null || cell === undefined ? "" : cell.toString().replace(/"/g, '""'); // ダブルクオートをエスケープ
+      if (cell === undefined) {
+        return ""; // 空セルの処理
+      }
+      else if (cell === null) {
+        return "NULL"; // NULLの処理
+      }
+      const cellString = cell.toString();
+      // ISO 8601 形式の場合はフォーマットを変更
+      if (isoDatePattern.test(cellString)) {
+        const formattedDate = cellString.replace('T', ' ').split('.')[0]; // "T"を" "に置き換え、ミリ秒を削除
+        return `"${formattedDate}"`; // ダブルクォーテーションで囲む
+      }
+      return cellString.replace(/"/g, '""'); // ダブルクォーテーションのエスケープ
     });
-    csvContent += '"' + values.join('","') + '"\n';
+    csvContent += values.join(",") + "\n";
   });
   return csvContent;
 }
+

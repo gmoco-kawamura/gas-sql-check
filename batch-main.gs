@@ -1,11 +1,12 @@
-function executeSqlQuery() {
+// master
+function executeBatchSqlQuery() {
   const scriptProperties = PropertiesService.getScriptProperties();
   const spreadsheetId = scriptProperties.getProperty('spreadsheetId');
-  const sheetName = 'test' //scriptProperties.getProperty('sheetName');
+  const sheetName = 'test_batch' //scriptProperties.getProperty('batchSheetName');
   const settingSheetName = scriptProperties.getProperty('settingSheetName');
   const sheet = SpreadsheetApp.openById(spreadsheetId).getSheetByName(sheetName);
   const settingSheet = SpreadsheetApp.openById(spreadsheetId).getSheetByName(settingSheetName);
-  const parentFolderId = PropertiesService.getScriptProperties().getProperty('parentFolderId'); // 親フォルダのID
+  const parentFolderId = PropertiesService.getScriptProperties().getProperty('parentFolderIdOfBatch'); // 親フォルダのID
   const url = 'http://34.84.94.96:8080/execute-sql'; // ComputeEngineのAPIサーバーのURL
 
   // rowの初期化
@@ -46,7 +47,7 @@ function executeSqlQuery() {
     };
 
     try {
-      const folderId = getFolderIdFromSheet(sheet, parentFolderId, row);
+      const folderId = getBatchFolderIdFromSheet(sheet, parentFolderId, row);
       if (!folderId) {
         Logger.log(`========== END PROCESSING: Row ${row} ==========`);
         continue;
@@ -59,9 +60,11 @@ function executeSqlQuery() {
         const response = UrlFetchApp.fetch(url, options);
         const result = JSON.parse(response.getContentText());
         if (result.error) {
-          // エラー発生時にN列にエラーメッセージを入力
-          sheet.getRange('N' + row).setValue(result.error);
-          return;
+          // エラー発生時にS列にエラーメッセージを入力
+          sheet.getRange('S' + row).setValue(result.error);
+          Logger.log(result.error);
+          Logger.log(`========== END PROCESSING: Row ${row} ==========`);
+          continue;
         }
         totalExecutionTime += result.executionTime; // 合計実行時間
 
@@ -78,26 +81,26 @@ function executeSqlQuery() {
           rowCount = result.rowCount;
         }
 
-        if (count === 0) {
-          if (result.data.length) {
-            // csv保存
-            const csvContent = convertJsonToCsv(result.data);
-            const csvFileId = saveCsv(csvContent, folderId);
-            Logger.log('Saved Csv File Id: ' + csvFileId);
-          }
+        // if (count === 0) {
+        //   if (result.data.length) {
+        //     // csv保存
+        //     const csvContent = convertJsonToCsv(result.data);
+        //     const csvFileId = saveCsv(csvContent, folderId);
+        //     Logger.log('Saved Csv File Id: ' + csvFileId);
+        //   }
 
-          // sql保存
-          const sqlFileId = saveSql(sqlQuery, folderId);
-          Logger.log('Saved Sql File Id: ' + sqlFileId);
+        //   // sql保存
+        //   const sqlFileId = saveSql(sqlQuery, folderId);
+        //   Logger.log('Saved Sql File Id: ' + sqlFileId);
 
-          // データをスプレッドシートに書き込み
-          sheet.getRange('J' + row).setValue(rowCount);  // 対象レコード数
-        }
+        //   // データをスプレッドシートに書き込み
+        //   sheet.getRange('J' + row).setValue(rowCount);  // 対象レコード数
+        // }
 
-        // log保存
-        const logContent = createLogContent(result.startTime, sqlQuery, rowCount, result.executionTime);
-        const logFileId = saveLog(logContent, folderId, count);
-        Logger.log('Saved Log File Id: ' + logFileId);
+        // // log保存
+        // const logContent = createLogContent(result.startTime, sqlQuery, rowCount, result.executionTime);
+        // const logFileId = saveLog(logContent, folderId, count);
+        // Logger.log('Saved Log File Id: ' + logFileId);
       }
       // 平均処理時間
       const averageExecutionTimeSec = ((totalExecutionTime / 3) / 1000).toFixed(3);

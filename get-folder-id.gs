@@ -13,20 +13,46 @@ function getFolderIdFromSheet(sheet, parentFolderId, row) {
   
     // フォルダIDを取得
     const folderBId = getFolderId(parentFolderId, folderNameB);
-    if (!folderBId) throw new Error('フォルダ "' + folderNameB + '" が見つかりませんでした');
+    if (!folderBId) throw new Error('ERROR: The folder "' + folderNameB + '" was not found');
     
     const folderCId = getFolderId(folderBId, folderNameC);
-    if (!folderCId) throw new Error('フォルダ "' + folderNameC + '" が見つかりませんでした');
+    if (!folderCId) throw new Error('ERROR: The folder "' + folderNameC + '" was not found');
     
     const folderHId = getFolderId(folderCId, folderNameH);
-    if (!folderHId) throw new Error('フォルダ "' + folderNameH + '" が見つかりませんでした');
+    if (!folderHId) throw new Error('ERROR: The folder "' + folderNameH + '" was not found');
     
     const folderSuccessId = getFolderId(folderHId, folderSuccessName);
-    if (!folderSuccessId) throw new Error('フォルダ "success" が見つかりませんでした');
+    if (!folderSuccessId) throw new Error('ERROR: The folder "success" was not found');
     
     return folderSuccessId;
   } catch (error) {
-    Logger.log(error.message);
+    return null;
+  }
+}
+
+function getBatchFolderIdFromSheet(sheet, parentFolderId, row) {
+  try {
+    const cellB = getNonEmptyCell(sheet, 'B', row);  // 空白であれば上のセルを参照
+    const cellH = 'H' + row;
+    
+    // フォルダ名を取得(コントロール名)
+    const folderNameB = getFolderName(true, sheet, cellB);
+    let folderNameH = getFolderName(false, sheet, cellH);
+    folderNameH = padNumberInString(folderNameH);
+    const folderSuccessName = 'success';
+  
+    // フォルダIDを取得
+    const folderBId = getFolderId(parentFolderId, folderNameB);
+    if (!folderBId) throw new Error('ERROR: The folder "' + folderNameB + '" was not found');
+    
+    const folderHId = getFolderId(folderBId, folderNameH);
+    if (!folderHId) throw new Error('ERROR: The folder "' + folderNameH + '" was not found');
+    
+    const folderSuccessId = getFolderId(folderHId, folderSuccessName);
+    if (!folderSuccessId) throw new Error('ERROR: The folder "success" was not found');
+    
+    return folderSuccessId;
+  } catch (error) {
     return null;
   }
 }
@@ -79,10 +105,10 @@ function getFolderId(parentFolderId, folderName) {
   if (folders.hasNext()) {
     const folder = folders.next();
     const folderId = folder.getId();
-    Logger.log('フォルダ "' + folderName + '" のID: ' + folderId);  // フォルダIDをログに出力
+    // Logger.log('フォルダ "' + folderName + '" のID: ' + folderId);  // フォルダIDをログに出力
     return folderId;
   } else {
-    Logger.log('フォルダ "' + folderName + '" は見つかりませんでした');
+    Logger.log('ERROR: The folder "' + folderName + '" was not found');
     return null;
   }
 }

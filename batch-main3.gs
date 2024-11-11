@@ -1,11 +1,12 @@
-function executeSqlQuery() {
+// 鈴木さん用
+function executeBatchSqlQuery3() {
   const scriptProperties = PropertiesService.getScriptProperties();
   const spreadsheetId = scriptProperties.getProperty('spreadsheetId');
-  const sheetName = 'test' //scriptProperties.getProperty('sheetName');
-  const settingSheetName = scriptProperties.getProperty('settingSheetName');
+  const sheetName = scriptProperties.getProperty('batchSheetName');
+  const settingSheetName = 'setting3'; //scriptProperties.getProperty('settingSheetName');
   const sheet = SpreadsheetApp.openById(spreadsheetId).getSheetByName(sheetName);
   const settingSheet = SpreadsheetApp.openById(spreadsheetId).getSheetByName(settingSheetName);
-  const parentFolderId = PropertiesService.getScriptProperties().getProperty('parentFolderId'); // 親フォルダのID
+  const parentFolderId = PropertiesService.getScriptProperties().getProperty('parentFolderIdOfBatch'); // 親フォルダのID
   const url = 'http://34.84.94.96:8080/execute-sql'; // ComputeEngineのAPIサーバーのURL
 
   // rowの初期化
@@ -46,7 +47,7 @@ function executeSqlQuery() {
     };
 
     try {
-      const folderId = getFolderIdFromSheet(sheet, parentFolderId, row);
+      const folderId = getBatchFolderIdFromSheet(sheet, parentFolderId, row);
       if (!folderId) {
         Logger.log(`========== END PROCESSING: Row ${row} ==========`);
         continue;
@@ -59,9 +60,11 @@ function executeSqlQuery() {
         const response = UrlFetchApp.fetch(url, options);
         const result = JSON.parse(response.getContentText());
         if (result.error) {
-          // エラー発生時にN列にエラーメッセージを入力
-          sheet.getRange('N' + row).setValue(result.error);
-          return;
+          // エラー発生時にS列にエラーメッセージを入力
+          sheet.getRange('S' + row).setValue(result.error);
+          Logger.log(result.error);
+          Logger.log(`========== END PROCESSING: Row ${row} ==========`);
+          continue;
         }
         totalExecutionTime += result.executionTime; // 合計実行時間
 
@@ -72,7 +75,8 @@ function executeSqlQuery() {
         Logger.log('startTime: ' + result.startTime);
 
         if (result.rowCount) {
-          rowCount = result.rowCount - 1; // indexの1行をCountから引く
+          // rowCount = result.rowCount - 1; // indexの1行をCountから引く
+          rowCount = result.rowCount; // indexの1行をCountから引くs
         }
         else {
           rowCount = result.rowCount;

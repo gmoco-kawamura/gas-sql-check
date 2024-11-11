@@ -1,8 +1,10 @@
-function executeSqlQuery() {
+// 田中さん用
+// SQLを実行する関数
+function executeSqlQuery2() {
   const scriptProperties = PropertiesService.getScriptProperties();
   const spreadsheetId = scriptProperties.getProperty('spreadsheetId');
-  const sheetName = 'test' //scriptProperties.getProperty('sheetName');
-  const settingSheetName = scriptProperties.getProperty('settingSheetName');
+  const sheetName = scriptProperties.getProperty('sheetName');
+  const settingSheetName = 'setting2'; //scriptProperties.getProperty('settingSheetName');
   const sheet = SpreadsheetApp.openById(spreadsheetId).getSheetByName(sheetName);
   const settingSheet = SpreadsheetApp.openById(spreadsheetId).getSheetByName(settingSheetName);
   const parentFolderId = PropertiesService.getScriptProperties().getProperty('parentFolderId'); // 親フォルダのID
@@ -17,6 +19,7 @@ function executeSqlQuery() {
   let uniqueValues = rawValue.toString().includes("_") ? rawValue.split("_") : [rawValue.toString()];
   uniqueValues.sort((a, b) => parseInt(a) - parseInt(b));
 
+  // 取得した値を `for` 文で使用
   for (let i = 0; i < uniqueValues.length; i++) {
     const row = parseInt(uniqueValues[i]); // 数値に変換
     Logger.log(`========== START PROCESSING: Row ${row} ==========`);
@@ -50,7 +53,7 @@ function executeSqlQuery() {
       if (!folderId) {
         Logger.log(`========== END PROCESSING: Row ${row} ==========`);
         continue;
-      }
+      }      
       let totalExecutionTime = 0;
 
       for (let count = 0; count < 3; count++) {
