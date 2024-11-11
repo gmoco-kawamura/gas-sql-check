@@ -61,7 +61,8 @@ function executeSqlQuery() {
         if (result.error) {
           // エラー発生時にN列にエラーメッセージを入力
           sheet.getRange('N' + row).setValue(result.error);
-          return;
+          Logger.log(`========== END PROCESSING: Row ${row} ==========`);
+          continue;
         }
         totalExecutionTime += result.executionTime; // 合計実行時間
 
